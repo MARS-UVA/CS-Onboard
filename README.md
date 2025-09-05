@@ -28,4 +28,12 @@ I also use Git Bash sometimes instead of Windows powershell (because windows pow
 
 ## What is Linux?
 
-You are probably using Windows OS (operating system), or if you have a Mac, MacOS. The robot uses Linux. There are a couple Linux command-line things to know
+You are probably using Windows OS (operating system), or if you have a Mac, MacOS. The robot uses Linux. There are a couple Linux command-line things to know, but mainly just cd (change directory) and apt (package manager), outside of other things like ROS2 commands. 
+
+Linux is good for downloading packages and drivers; a lot of the same things work much differently on Windows, or just aren't provided. Linux is much more integrated with the softwares we use like ROS2. You can learn more here (https://ubuntu.com/tutorials/command-line-for-beginners#1-overview) but this can be like learn as you go. 
+
+We use Ubuntu (I suggest 24.04 but I might be on 22.04, you will have a better experience with a newer Python ROS2 but I have not upgraded yet for other reasons). There are a couple options: using a VM (might have USB issues), WSL (might have kernel issues but I prefer this honestly), or dual booting (best but you might brick your computer). Dual booting is native and this is what I have done this past Summer, but by no means am I an expert; my laptop just happened to have a second ssd slot. My second option would be WSL (https://documentation.ubuntu.com/wsl/latest/howto/install-ubuntu-wsl2/). If not, ask about VMs idk rn.
+
+## ROS2
+
+https://docs.ros.org/en/jazzy/index.html. Basically everything needed ROS2-related. 
