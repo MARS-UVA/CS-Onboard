@@ -36,4 +36,4 @@ We use Ubuntu (I suggest 24.04 but I might be on 22.04, you will have a better e
 
 ## ROS2
 
-https://docs.ros.org/en/jazzy/index.html. Basically everything needed ROS2-related. 
+https://docs.ros.org/en/humble/index.html (switch to Kilted? Options are stay on humble or get docker for Kilted). Basically everything needed ROS2-related. 
