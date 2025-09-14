@@ -10,11 +10,13 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(realsense2 2.56 REQUIRED)
+find_package(OpenCV REQUIRED)
 
 add_executable(realsense_test src/motion_capture.cpp)
 
 target_include_directories(realsense_test PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${OpenCV_INCLUDE_DIRS}
   )
 
 target_compile_features(realsense_test PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
@@ -27,10 +29,10 @@ set(dependencies
 )
 
 target_link_libraries(realsense_test 
-
   realsense2::realsense2
   rclcpp::rclcpp
   ${std_msgs_TARGETS}
+  ${OpenCV_LIBS}
 )
 
 install(TARGETS realsense_test

@@ -24,9 +24,11 @@ target_include_directories(example_node PUBLIC
 
 target_compile_features(example_node PUBLIC c_std_99 cxx_std_17)  # Require C99 and C++17
 
-ament_target_dependencies(example_node #attach dependencies to the executable
-  rclcpp
-  std_msgs
+#ament_target_dependencies is deprecated officially in kilted, lowk doesn't work for realsense in humble either
+
+target_link_libraries(example_node
+  rclcpp::rclcpp
+  ${std_msgs_TARGETS}
 )
 
 
