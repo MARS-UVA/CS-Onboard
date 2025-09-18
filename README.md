@@ -8,7 +8,7 @@ Learning this might be difficult depending on how well-versed you are already, s
 
 Our codebase is a mix of Python and C++ (with ROS2 which I'll explain later), which need to be downloaded separately. 
 
-I use Visual Studio **Code**. This is a lightweight code editor, however it doesn't really come with anything. I think I used this link to setup C++: https://code.visualstudio.com/docs/cpp/config-mingw, and setting up Python is probably a lot easier. This is a very common editor, but many people (C/C++ developers mainly) also use Visual Studio since it comes with a lot of C++ tools (I think).
+I use Visual Studio **Code**. This is a lightweight code editor, however it doesn't really come with anything. I think I used this link to setup C++ (**YOU DON'T NEED TO DO THIS I FORGOT WE HAVE LINUX**): https://code.visualstudio.com/docs/cpp/config-mingw, and setting up Python is probably a lot easier. This is a very common editor, but many people (C/C++ developers mainly) also use Visual Studio since it comes with a lot of C++ tools (I think).
 
 C++ is a compiler-based language; you need a compiler in order to run files. ROS2 handles it for us using the tool **colcon**, but it uses gcc or some other compiler in the background. You have to compile code into an executable in order to run anything.
 
