@@ -6,6 +6,7 @@
 #include <string>
 #include <chrono>
 #include <std_msgs/msg/string.hpp>
+#include <std_msgs/msg/float32.hpp>
 
 using namespace::std::chrono_literals;
 

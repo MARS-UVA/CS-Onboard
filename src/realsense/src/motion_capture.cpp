@@ -11,7 +11,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
-
+#include <yourmom>
 #include <librealsense2/rs.hpp>
 #include <functional>
 #include <memory>
@@ -24,10 +24,13 @@ class RSNode : public rclcpp::Node {
         RSNode()
         : Node("rs_node") {
             std::cout << ("Started constructor\n");
-            example_publisher_ = this->create_publisher<std_msgs::msg::String>("topic", 10);
-            printf("Made publisher\n");
+            accel_x = this->create_publisher<std_msgs::msg::Float32>("/rs_imu/x_accel", 10);
+            accel_y = this->create_publisher<std_msgs::msg::Float32>("/rs_imu/y_accel", 10);
+            accel_z = this->create_publisher<std_msgs::msg::Float32>("/rs_imu/z_accel", 10);
+
+            printf("Made publishers\n");
             timer_ = this->create_wall_timer(
-            500ms, std::bind(&RSNode::timer_callback, this));
+            100ms, std::bind(&RSNode::timer_callback, this));
         }
 
         void startPipeline() {
@@ -41,7 +44,8 @@ class RSNode : public rclcpp::Node {
 
             try {
                 rs2::config cfg;
-                cfg.enable_stream(RS2_STREAM_DEPTH, 848, 480, RS2_FORMAT_Z16, 30);
+                cfg.enable_stream(RS2_STREAM_ACCEL, RS2_FORMAT_MOTION_XYZ32F, 100);
+                // cfg.enable_stream(RS2_STREAM_DEPTH, 848, 480, RS2_FORMAT_Z16, 30);
                 // cfg.enable_stream(RS2_STREAM_COLOR, 1280, 720, RS2_FORMAT_RGB8, 30);
                 pipeline_.start(cfg);
             } catch (const rs2::error & e) {
@@ -52,24 +56,38 @@ class RSNode : public rclcpp::Node {
 
     private:
         rs2::pipeline pipeline_;
-        rclcpp::Publisher<std_msgs::msg::String>::SharedPtr example_publisher_;
+        rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr accel_x;
+        rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr accel_y;
+        rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr accel_z;
+
         rclcpp::TimerBase::SharedPtr timer_;
         void timer_callback()
         {
             rs2::frameset frames = pipeline_.wait_for_frames();
-            rs2::depth_frame dpt_frame = frames.get_depth_frame();
-            std::cout<<"wow i found a frame"<<std::endl;
-            cv::Size dpt_size = cv::Size(dpt_frame.get_width(), dpt_frame.get_height());
-            rs2::colorizer dpt_rgb(0);
-            rs2::video_frame dpt_colored = dpt_rgb.colorize(dpt_frame);
+            rs2::motion_frame mf = frames.first_or_default(RS2_STREAM_ACCEL);
+            
+            if(mf) {
+                rs2_vector motion_vector = mf.get_motion_data();
+                auto msg = std_msgs::msg::Float32();
+                msg.data = motion_vector.x;
+                accel_x->publish(msg);
+                msg.data = motion_vector.y;
+                accel_y->publish(msg);
+                msg.data = motion_vector.z;
+                accel_z->publish(msg);
+            }
+            
+
+            // rs2::depth_frame dpt_frame = frames.get_depth_frame();
+            // std::cout<<"wow i found a frame"<<std::endl;
+            // cv::Size dpt_size = cv::Size(dpt_frame.get_width(), dpt_frame.get_height());
+            // rs2::colorizer dpt_rgb(0);
+            // rs2::video_frame dpt_colored = dpt_rgb.colorize(dpt_frame);
 
             
-            cv::Mat img = cv::Mat(dpt_size, CV_8UC3, (void*)dpt_colored.get_data(), cv::Mat::AUTO_STEP);
-            cv::imshow("craig sucks at coding", img);
-            cv::waitKey(500);
-            auto message = std_msgs::msg::String();
-            message.data = "publishing";
-            example_publisher_->publish(message);
+            // cv::Mat img = cv::Mat(dpt_size, CV_8UC3, (void*)dpt_colored.get_data(), cv::Mat::AUTO_STEP);
+            // cv::imshow("craig sucks at coding", img);
+            // cv::waitKey(100);
         }
 };
 
@@ -82,7 +100,7 @@ int main(int argc, char ** argv)
     auto node = std::make_shared<RSNode>();
     std::cout << "Starting pipeline 0\n";
     node->startPipeline();
-    // node.startPipeline();
+
     rclcpp::spin(node);
     rclcpp::shutdown();
 
