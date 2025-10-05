@@ -7,12 +7,14 @@
 #include <std_msgs/msg/float32.hpp>
 #include <std_msgs/msg/string.hpp>
 #include <iostream>
+
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/highgui.hpp>
 #include <librealsense2/rs.hpp>
 #include <functional>
 #include <memory>
+#include <cmath>
 
 using namespace::std::chrono_literals;
 
@@ -22,9 +24,10 @@ class RSNode : public rclcpp::Node {
         RSNode()
         : Node("rs_node") {
             std::cout << ("Started constructor\n");
-            accel_x = this->create_publisher<std_msgs::msg::Float32>("/rs_imu/x_accel", 10);
             accel_y = this->create_publisher<std_msgs::msg::Float32>("/rs_imu/y_accel", 10);
-            accel_z = this->create_publisher<std_msgs::msg::Float32>("/rs_imu/z_accel", 10);
+            publisher_ = this->create_publisher<std_msgs::msg::Float32>("angle",10);
+            y_subscriber = this->create_subscription<std_msgs::msg::Float32>(
+      "/rs_imu/y_accel", 10, std::bind(&RSNode::topic_callback, this, std::placeholders::_1));
 
             printf("Made publishers\n");
             timer_ = this->create_wall_timer(
@@ -54,11 +57,14 @@ class RSNode : public rclcpp::Node {
 
     private:
         rs2::pipeline pipeline_;
-        rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr accel_x;
         rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr accel_y;
-        rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr accel_z;
-
         rclcpp::TimerBase::SharedPtr timer_;
+        rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr publisher_;
+        rclcpp::Subscription<std_msgs::msg::Float32>::SharedPtr y_subscriber;
+
+
+        float angle_;
+
         void timer_callback()
         {
             rs2::frameset frames = pipeline_.wait_for_frames();
@@ -67,13 +73,19 @@ class RSNode : public rclcpp::Node {
             if(mf) {
                 rs2_vector motion_vector = mf.get_motion_data();
                 auto msg = std_msgs::msg::Float32();
-                msg.data = motion_vector.x;
-                accel_x->publish(msg);
                 msg.data = motion_vector.y;
                 accel_y->publish(msg);
-                msg.data = motion_vector.z;
-                accel_z->publish(msg);
             }
+        };
+        void topic_callback(const std_msgs::msg::Float32::SharedPtr msg)
+        {
+            angle_ = std::acos(std::abs(msg->data)/9.81) * 180.0 / M_PI;
+
+            auto angle_msg = std_msgs::msg::Float32();
+            angle_msg.data = angle_;
+            publisher_->publish(angle_msg);
+            RCLCPP_WARN(this->get_logger(), "Received accel: %.3f, Calculated angle: %.2f", msg->data, angle_);
+        }
             
 
             // rs2::depth_frame dpt_frame = frames.get_depth_frame();
@@ -86,7 +98,6 @@ class RSNode : public rclcpp::Node {
             // cv::Mat img = cv::Mat(dpt_size, CV_8UC3, (void*)dpt_colored.get_data(), cv::Mat::AUTO_STEP);
             // cv::imshow("craig sucks at coding", img);
             // cv::waitKey(100);
-        }
 };
 
 int main(int argc, char ** argv)

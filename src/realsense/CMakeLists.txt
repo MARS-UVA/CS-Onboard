@@ -13,6 +13,7 @@ find_package(realsense2 2.56 REQUIRED)
 find_package(OpenCV REQUIRED)
 
 add_executable(realsense_test src/motion_capture.cpp)
+add_executable(testing src/tipping_node.cpp)
 
 target_include_directories(realsense_test PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -34,8 +35,16 @@ target_link_libraries(realsense_test
   ${std_msgs_TARGETS}
   ${OpenCV_LIBS}
 )
+target_link_libraries(testing 
+  realsense2::realsense2
+  rclcpp::rclcpp
+  ${std_msgs_TARGETS}
+  ${OpenCV_LIBS}
+)
 
-install(TARGETS realsense_test
+install(TARGETS 
+realsense_test 
+testing
   DESTINATION lib/${PROJECT_NAME})
 
 
